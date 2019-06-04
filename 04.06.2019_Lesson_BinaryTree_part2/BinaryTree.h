@@ -67,6 +67,7 @@ template<typename T>
 inline void Btree<T>::del(T el)
 {
 	Node<T>*tmp = 0;
+	Node<T>*tmp2 = 0;
 	if (search(el))
 		tmp = search_ptr(el);
 	else {
@@ -75,26 +76,30 @@ inline void Btree<T>::del(T el)
 	}
 
 	if (tmp->getLeftPtr() == 0 && tmp->getRightPtr() == 0) {
-		tmp = 0;
+		//tmp = 0;
+		//сначала удалить эл под указателем, а только потом обнулять
 		tmp = NULL;//delete tmp;//? nullptr //NULL
 		size--;
 		return;
 	}
-	else if (tmp->getLeftPtr() != 0 && tmp->getRightPtr() != 0)
+	else if (tmp->getLeftPtr() != 0 && tmp->getRightPtr() != 0) {
 		tmp = del_helper(el, tmp->getRightPtr());
+		//указатели переставлять или замены достаточно?
+	}
 	else {
 		if (el < root->getEl()) {
-			tmp = del_helper(el, root->getLeftPtr());
+			tmp2 = del_helper(el, root->getLeftPtr());
 		}
 		else
-			tmp = del_helper(el, root->getRightPtr());
+			tmp2 = del_helper(el, root->getRightPtr());
 
-		if (tmp->getLeftPtr() != 0)//
-			tmp->getLeftPtr() = tmp->getLeftPtr()->getLeftPtr();
-		else if(tmp->getRightPtr()!=0)//
-			tmp->getLeftPtr() = tmp->getLeftPtr()->getLeftPtr();//
+		if (tmp->getLeftPtr() != 0)//condition > <
+			tmp2->getLeftPtr() = tmp->getLeftPtr();
+		else if (tmp->getRightPtr() != 0)
+			tmp2->getRightPtr() = tmp->getRightPtr();
 	}
 
+	size--;
 
 	//else {
 	//	if (tmp->getEl() < root->getEl()) {
@@ -119,10 +124,10 @@ inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
 {
 	Node<T>*tmp = 0;
 
-	if (ptr->getLeftPtr()->getEl() == el)
+	if (ptr->getLeftPtr()->getEl() == el || ptr->getRightPtr()->getEl() == el)
 		tmp = ptr;
-	else if (ptr->getRightPtr()->getEl() == el) 
-		tmp = ptr;
+	/*else if (ptr->getRightPtr()->getEl() == el) 
+		tmp = ptr;*/
 	else {
 		if (el < ptr->getEl()) {
 			ptr = del_helper(el, ptr->getLeftPtr());
@@ -131,7 +136,7 @@ inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
 			ptr = del_helper(el, ptr->getRightPtr());
 	}
 
-	//
+	//another helper?
 	if (ptr->getLeftPtr() == 0) {
 		tmp = ptr;
 		//if (ptr->getRightPtr() == 0)
@@ -142,7 +147,6 @@ inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
 	else
 		tmp = del_helper(el, ptr->getLeftPtr());
 
-	size--;
 	return tmp;
 }
 
