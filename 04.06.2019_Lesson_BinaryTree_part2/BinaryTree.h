@@ -9,7 +9,7 @@ class Btree {
 	void print_helper(Node<T>* ptr);
 	bool search_helper(T el, Node<T>* ptr);
 	Node<T>* &search_ptr_helper(T el, Node<T>*ptr);
-	Node<T>* &del_helper(Node<T>* ptr);
+	Node<T>* &del_helper(T el, Node<T>*& ptr);
 public:
 	Btree();
 	//~BTree();
@@ -76,46 +76,73 @@ inline void Btree<T>::del(T el)
 
 	if (tmp->getLeftPtr() == 0 && tmp->getRightPtr() == 0) {
 		tmp = 0;
-		delete tmp;//? nullptr //NULL
+		tmp = NULL;//delete tmp;//? nullptr //NULL
 		size--;
 		return;
 	}
 	else if (tmp->getLeftPtr() != 0 && tmp->getRightPtr() != 0)
-		tmp = del_helper(tmp->getRightPtr());
+		tmp = del_helper(el, tmp->getRightPtr());
 	else {
-		if (tmp->getEl() < root->getEl()) {
-			if (tmp->getRightPtr() == 0)
-				tmp->getPrevPtr()->getLeftPtr() = tmp->getLeftPtr();
-			else
-				tmp->getPrevPtr()->getLeftPtr() = tmp->getRightPtr();
+		if (el < root->getEl()) {
+			tmp = del_helper(el, root->getLeftPtr());
 		}
-		else {
-			if (tmp->getRightPtr() == 0)
-				tmp->getPrevPtr()->getRightPtr() = tmp->getLeftPtr();
-			else
-				tmp->getPrevPtr()->getRightPtr() = tmp->getRightPtr();
-		}
-		tmp = NULL;
-		size--;
+		else
+			tmp = del_helper(el, root->getRightPtr());
+
+		if (tmp->getLeftPtr() != 0)//
+			tmp->getLeftPtr() = tmp->getLeftPtr()->getLeftPtr();
+		else if(tmp->getRightPtr()!=0)//
+			tmp->getLeftPtr() = tmp->getLeftPtr()->getLeftPtr();//
 	}
+
+
+	//else {
+	//	if (tmp->getEl() < root->getEl()) {
+	//		if (tmp->getRightPtr() == 0)
+	//			tmp->getPrevPtr()->getLeftPtr() = tmp->getLeftPtr();
+	//		else
+	//			tmp->getPrevPtr()->getLeftPtr() = tmp->getRightPtr();
+	//	}
+	//	else {
+	//		if (tmp->getRightPtr() == 0)
+	//			tmp->getPrevPtr()->getRightPtr() = tmp->getLeftPtr();
+	//		else
+	//			tmp->getPrevPtr()->getRightPtr() = tmp->getRightPtr();
+	//	}
+	//	tmp = NULL;
+	//	size--;
+	//}
 
 }
 template<typename T>
-inline Node<T>*& Btree<T>::del_helper(Node<T>* ptr)
+inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
 {
 	Node<T>*tmp = 0;
+
+	if (ptr->getLeftPtr()->getEl() == el)
+		tmp = ptr;
+	else if (ptr->getRightPtr()->getEl() == el) 
+		tmp = ptr;
+	else {
+		if (el < ptr->getEl()) {
+			ptr = del_helper(el, ptr->getLeftPtr());
+		}
+		else
+			ptr = del_helper(el, ptr->getRightPtr());
+	}
+
+	//
 	if (ptr->getLeftPtr() == 0) {
 		tmp = ptr;
 		//if (ptr->getRightPtr() == 0)
 		ptr = NULL;
 		/*	else
 				ptr->getPrevPtr()->getLeftPtr() = ptr->getRightPtr();*/
-		size--;
 	}
-
 	else
-		del_helper(ptr->getLeftPtr());
+		tmp = del_helper(el, ptr->getLeftPtr());
 
+	size--;
 	return tmp;
 }
 
