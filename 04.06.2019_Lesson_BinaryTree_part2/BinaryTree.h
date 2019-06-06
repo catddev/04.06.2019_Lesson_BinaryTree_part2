@@ -10,9 +10,10 @@ class Btree {
 	bool search_helper(T el, Node<T>* ptr);
 	Node<T>* &search_ptr_helper(T el, Node<T>*ptr);
 	Node<T>* &del_helper(T el, Node<T>*& ptr);
+	Node<T>* &del_helper2(Node<T>*& ptr);
 public:
 	Btree();
-	//~BTree();
+	~BTree();
 	void add(T el);
 	void del(T el);
 
@@ -30,6 +31,14 @@ inline Btree<T>::Btree()
 	root = 0;
 	size = 0;
 }
+
+template<typename T>
+inline Btree<T>::~BTree()
+{
+	//delete all nodes, use method like "dump" in the list
+}
+
+
 
 template<typename T>
 inline void Btree<T>::add(T el)
@@ -70,20 +79,27 @@ inline void Btree<T>::del(T el)
 	Node<T>*tmp2 = 0;
 	if (search(el))
 		tmp = search_ptr(el);
+	//maybe another method search for previous el? then delete tmp2->getLeftPtr/RightPtr if == ptr
 	else {
 		cout << "No such an element at the Tree" << endl;
 		return;
 	}
 
 	if (tmp->getLeftPtr() == 0 && tmp->getRightPtr() == 0) {
-		//tmp = 0;
 		//сначала удалить эл под указателем, а только потом обнулять
-		tmp = NULL;//delete tmp;//? nullptr //NULL
+
+		/*delete tmp->getLeftPtr();
+		delete tmp->getRightPtr();*/
+		//~tmp;
+		//delete search_ptr(el);
+		delete tmp;//? nullptr //NULL
 		size--;
 		return;
 	}
 	else if (tmp->getLeftPtr() != 0 && tmp->getRightPtr() != 0) {
-		tmp = del_helper(el, tmp->getRightPtr());
+
+		tmp = del_helper2(tmp->getRightPtr());
+
 		//указатели переставлять или замены достаточно?
 	}
 	else {
@@ -101,23 +117,6 @@ inline void Btree<T>::del(T el)
 
 	size--;
 
-	//else {
-	//	if (tmp->getEl() < root->getEl()) {
-	//		if (tmp->getRightPtr() == 0)
-	//			tmp->getPrevPtr()->getLeftPtr() = tmp->getLeftPtr();
-	//		else
-	//			tmp->getPrevPtr()->getLeftPtr() = tmp->getRightPtr();
-	//	}
-	//	else {
-	//		if (tmp->getRightPtr() == 0)
-	//			tmp->getPrevPtr()->getRightPtr() = tmp->getLeftPtr();
-	//		else
-	//			tmp->getPrevPtr()->getRightPtr() = tmp->getRightPtr();
-	//	}
-	//	tmp = NULL;
-	//	size--;
-	//}
-
 }
 template<typename T>
 inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
@@ -126,7 +125,7 @@ inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
 
 	if (ptr->getLeftPtr()->getEl() == el || ptr->getRightPtr()->getEl() == el)
 		tmp = ptr;
-	/*else if (ptr->getRightPtr()->getEl() == el) 
+	/*else if (ptr->getRightPtr()->getEl() == el)
 		tmp = ptr;*/
 	else {
 		if (el < ptr->getEl()) {
@@ -136,16 +135,20 @@ inline Node<T>*& Btree<T>::del_helper(T el, Node<T>*& ptr)
 			ptr = del_helper(el, ptr->getRightPtr());
 	}
 
-	//another helper?
+	return tmp;
+}
+
+template<typename T>
+inline Node<T>*& Btree<T>::del_helper2(Node<T>*& ptr)
+{
+	Node<T>*tmp = 0;
+
 	if (ptr->getLeftPtr() == 0) {
 		tmp = ptr;
-		//if (ptr->getRightPtr() == 0)
-		ptr = NULL;
-		/*	else
-				ptr->getPrevPtr()->getLeftPtr() = ptr->getRightPtr();*/
+		//ptr = NULL;//?
 	}
 	else
-		tmp = del_helper(el, ptr->getLeftPtr());
+		tmp = del_helper2(ptr->getLeftPtr());
 
 	return tmp;
 }
@@ -264,8 +267,6 @@ inline Node<T>*& Btree<T>::search_ptr_helper(T el, Node<T>* ptr)
 
 	return tmp;
 }
-
-
 
 template<typename T>
 inline int Btree<T>::getSize()
