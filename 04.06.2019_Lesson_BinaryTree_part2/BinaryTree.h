@@ -160,7 +160,7 @@ inline void Btree<T>::del(T el)
 
 	if (tmp->getLeftPtr() == 0 && tmp->getRightPtr() == 0) {
 		if (tmp == root) {
-			delete root;//root = 0 what is the difference?
+			delete root;//root = 0; delete means deletinf an element, and root=0 means pointer is null now
 			size--;
 			return;
 		}
@@ -224,7 +224,7 @@ inline void Btree<T>::del(T el)
 				tmp_prev->getRightPtr() = tmp->getRightPtr();
 	}
 
-	delete tmp;// tmp=0 is incorrect???
+	delete tmp;
 	size--;
 }
 
